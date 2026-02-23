@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from urllib import response
 from fastapi import FastAPI
 import logging
+from fastapi.middleware.cors import CORSMiddleware
+
+
 from pydantic import BaseModel
 import numpy as np
 from typing import Optional
@@ -10,7 +13,13 @@ from scipy.stats import norm
 # logging
 logger = logging.getLogger(__name__)
 app = FastAPI()
-
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=["http://localhost:5173"],   # or ["*"] for testing
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+)
 
 class Position():
     id: int 
@@ -26,7 +35,7 @@ class Position():
 def bs_pricer(is_call, S, K, T, r, q, sigma):
     ds = np.maximum(1e-6, sigma * np.sqrt(T))
     dsig = 0.5 * ds ** 2
-    F = S*np.exp(r-q)
+    F = S*np.exp((r-q)*T)
     d2 = (np.log(F/K) - dsig) / ds
     d1 = d2 + ds
 
